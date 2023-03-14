@@ -10,7 +10,7 @@ if (match_wikipedia_top_inventors =="YES"){
     #---------------------------------
     #read in names from PATSTAT
     #---------------------------------
-    names_observed_patstat <- fread(file=paste(path,"data/lexicon_inv.csv",sep=""))
+    names_observed_patstat <- fread(file=paste(path_to_raw_downloaded_data,"/lexicon_inv.csv",sep=""))
     names_observed_patstat      <- names_observed_patstat[names_observed_patstat[, .I[1], by = inv_eee_hrm_id]$V1]
     
     list_of_name_components <- extract_list_of_name_components(
@@ -26,12 +26,12 @@ if (match_wikipedia_top_inventors =="YES"){
     #---------------------------------
     #read in lists inventors from wiki
     #---------------------------------
-    list_of_top_inventors <- fread(file=paste(path,"data/data_preparation/wikipedia_list_top_inventors.csv",sep=""))[,1:5]
+    list_of_top_inventors <- fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/wikipedia_list_top_inventors.csv",sep=""))[,1:5]
     setnames(list_of_top_inventors,1:5,c("inv_name","nr_of_patents", "country", "years", "topic"))
     
     
     library(readstata13)
-    list_of_known_inventors <- read.dta13(file=paste(path,"data/data_preparation/wikipedia_inventor_list.dta",sep=""),encoding = 'UTF-8')
+    list_of_known_inventors <- read.dta13(file=paste(path_to_raw_downloaded_data,"/data_preparation/wikipedia_inventor_list.dta",sep=""),encoding = 'UTF-8')
     setnames(list_of_known_inventors,1:2,c("inv_name", "years"))     
     
     data_table_of_inventors_wiki <- rbind(list_of_top_inventors,list_of_known_inventors, fill=TRUE)
@@ -156,9 +156,9 @@ if (match_wikipedia_top_inventors =="YES"){
     
     
     
-    fwrite(matched_sample,   file = paste(path,"/data/data_preparation/matching_results_automatic_top_inventors.csv",sep=""))
+    fwrite(matched_sample,   file = paste(path_to_raw_downloaded_data,"/data_preparation/matching_results_automatic_top_inventors.csv",sep=""))
     #library("xlsx")
-    #write.xlsx(matched_sample, paste(path,"/data/data_preparation/matching_results_automatic_top_inventors.xlsx",sep="") ) 
+    #write.xlsx(matched_sample, paste(path_to_raw_downloaded_data,"/data_preparation/matching_results_automatic_top_inventors.xlsx",sep="") ) 
     rm(matched_sample, already_matched_name_components, data_matched_by_names, data_table_of_inventors_wiki, name_components_wikipedia, unmatched_name_components)
     gc()
     #---------------------
@@ -170,7 +170,7 @@ if (match_wikipedia_top_inventors =="YES"){
   
   # Read in the data on which wikipedia names have been found after manually correcting it
   #---------------------------------------------------------------------------------------
-  matches_of_top_inventors_manually_checked <- read.csv(file= paste(path,"/data/data_preparation/matching_results_manual_top_inventors.csv",sep=""), sep = ";" , header = TRUE) 
+  matches_of_top_inventors_manually_checked <- read.csv(file= paste(path_to_raw_downloaded_data,"/data_preparation/matching_results_manual_top_inventors.csv",sep=""), sep = ";" , header = TRUE) 
   matches_of_top_inventors_manually_checked <- as.data.table(matches_of_top_inventors_manually_checked)[,list(inv_eee_hrm_id,inv_name_wiki=paste(" ", inv_name," ", sep=""), Problem)]
   matches_of_top_inventors_manually_checked[,inv_name_wiki := gsub(pattern="  ", replacement=" ", x=inv_name_wiki)]
   matches_of_top_inventors_manually_checked[,inv_name_wiki := gsub(pattern="  ", replacement=" ", x=inv_name_wiki)]
@@ -183,7 +183,7 @@ if (match_wikipedia_top_inventors =="YES"){
   #-----------------------------
   
   #read in names lexikon
-  names_observed_patstat <- fread(file=paste(path,"data/lexicon_inv.csv",sep=""))
+  names_observed_patstat <- fread(file=paste(path_to_raw_downloaded_data,"/lexicon_inv.csv",sep=""))
   
   
   names_observed_patstat[inv_eee_hrm_id == 1887234]
@@ -212,7 +212,7 @@ if (match_wikipedia_top_inventors =="YES"){
   # Load patent data of best inventors
   #-----------------------------------
   
-  observed_inventor_patents <- unique(fread(file = paste(path, "/data/", "raw_data_inv_patent_location_all",".csv", sep=""))[,list(inv_eee_hrm_id, docdb_family_id)])[
+  observed_inventor_patents <- unique(fread(file = paste(path_to_raw_downloaded_data, "/", "patents_inv",".csv", sep=""))[,list(inv_eee_hrm_id, docdb_family_id)])[
     ,list(nr_patent_families=.N),by=c("inv_eee_hrm_id")][
       order(nr_patent_families)]
   
@@ -238,9 +238,9 @@ if (match_wikipedia_top_inventors =="YES"){
   hist(unique(evaluation_magerman_2006)[,percentage_hit_normally] )
   print(paste(evaluation_magerman_2006[409,inv_name_wiki], evaluation_magerman_2006[410,inv_name_wiki]))
   view_potentially_invalid_names <- merge(observed_inventor_patents[nr_patent_families>= 300],top_inventors_manually_checked_patent_data[,list(inv_eee_hrm_id,inv_name_wiki)], by = "inv_eee_hrm_id", all.x = TRUE)
-  view_potentially_invalid_names <- merge(view_potentially_invalid_names, fread(file=paste(path,"data/lexicon_inv.csv",sep="")), by = "inv_eee_hrm_id", all.x = TRUE)
+  view_potentially_invalid_names <- merge(view_potentially_invalid_names, fread(file=paste(path_to_raw_downloaded_data,"/lexicon_inv.csv",sep="")), by = "inv_eee_hrm_id", all.x = TRUE)
   
-  fwrite(evaluation_magerman_2006, file=paste(path, "/data/data_preparation/", "evaluation_magerman_2006_indentifiers_top_inventors",".csv", sep=""))
-  fwrite(top_inventors_manually_checked_patent_data, file=paste(path, "/data/data_preparation/", "top_inventors_manually_checked_with_PATSTAT_data",".csv", sep=""))
+  fwrite(evaluation_magerman_2006, file=paste(path_to_raw_downloaded_data, "/data_preparation/", "evaluation_magerman_2006_indentifiers_top_inventors",".csv", sep=""))
+  fwrite(top_inventors_manually_checked_patent_data, file=paste(path_to_raw_downloaded_data, "/data_preparation/", "top_inventors_manually_checked_with_PATSTAT_data",".csv", sep=""))
   
 }

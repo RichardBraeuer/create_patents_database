@@ -7,12 +7,8 @@ library(stringr)
 
 #data on locations
 #---#---#---#---#  
-city_data <- fread(file=paste(path_tools_data,"/localities_data/city_data.csv",sep=""),
+city_data <- fread(file=paste(path_tools_data,"/localities_data/city_data_",version_of_localizations,".csv",sep=""),
                    encoding = "UTF-8")
-
-city_country_codes <- unique(fread(file=paste(path_tools_data,"/localities_data/words_of_municipalities.csv",sep=""),
-                                 encoding ="UTF-8"
-)[,list(pair_city_region,country_code_city  )])
 
 
 #---list of inventors relevant for GDR
@@ -34,6 +30,7 @@ basis_gdr_data_selection <- merge(fread(paste(path_to_raw_downloaded_data,"paten
                                 (appln_auth =="EP" & inv_ctry==""),
                                 list(inv_person_id ,inventor_id=as.character(cleaned_id),appln_nr_epodoc)
                               ]
+
 list_cleaned_ids_gdr <- unique(basis_gdr_data_selection[,list(inv_person_id ,inventor_id)])
 
 
@@ -61,6 +58,16 @@ list_apl_gdr<- unique(
       by="appln_nr_epodoc")[,list(apl_person_id)]
 )
 setkey(list_apl_gdr,apl_person_id)
+
+
+rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
+               encoding="UTF-8")
+rich2[,person_id:=as.numeric(person_id)]
+list_apl_gdr <- merge(unique(rich2[,list(patstat_id ,person_id)],by="person_id"),
+      list_apl_gdr,
+      by.x="person_id",
+      by.y="apl_person_id",
+      all.x=TRUE)
 
 
 fwrite(list_apl_gdr,
@@ -121,6 +128,18 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
   setkey(list_apl_ussr,apl_person_id)
   
   
+  
+  rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
+                 encoding="UTF-8")
+  rich2[,person_id:=as.numeric(person_id)]
+  list_apl_ussr <- merge(unique(rich2[,list(patstat_id ,person_id)],by="person_id"),
+                         list_apl_ussr,
+                        by.x="person_id",
+                        by.y="apl_person_id",
+                        all.x=TRUE)
+  
+  
+  
   fwrite(list_apl_ussr,
          file=paste(path_to_output_data,"/ussr_relevant_data/list_applicants_ussr.csv",sep=""),
          quote=TRUE)
@@ -155,23 +174,40 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
       fread(paste(path_to_raw_downloaded_data,"lexicon_inv.csv",sep=""),
           encoding="UTF-8"),
       #merged with localization result
-      fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_inventors/localization_data.csv",sep=""),
+      fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_inventors/localization_data_",version_of_localizations,".csv",sep=""),
                 encoding="UTF-8"),
       by="inv_person_id",
-      all.x=TRUE)[,list(person_id=inv_person_id,address=inv_address,pair_city_region , state=inv_nuts ,country=inv_ctry)]
+      all.x=TRUE)[,list(person_id=inv_person_id,address=inv_address,pair_city_region , 
+                        state_local=NUTS2_equivalent_code,
+                        state_patent=inv_nuts,
+                        country_local=country_code_city,
+                        country_patent=inv_ctry)]
     ,
     merge(
       #original inv lexicon
       fread(paste(path_to_raw_downloaded_data,"lexicon_apl.csv",sep=""),
             encoding="UTF-8"),
       #merged with localization result
-      fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_applicants/localization_data.csv",sep=""),
+      fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_applicants/localization_data_",version_of_localizations,".csv",sep=""),
             encoding="UTF-8"),
       by="apl_person_id",
-      all.x=TRUE)[,list(person_id=apl_person_id,address=apl_address,pair_city_region , state=apl_nuts ,country=apl_ctry)]
+      all.x=TRUE)[,list(person_id=apl_person_id,address=apl_address,pair_city_region , 
+                        state_local=NUTS2_equivalent_code,
+                        state_patent=apl_nuts,
+                        country_local=country_code_city,
+                        country_patent=apl_ctry)]
     
     
-  )))
+  ),fill=TRUE))
+  
+  raw_location[,state:=state_patent]
+  raw_location[is.na(state),state:=state_patent]
+  raw_location[,country:=country_patent]
+  raw_location[is.na(country),country:=country_patent]
+  raw_location[,state_local:=NULL]
+  raw_location[,state_patent:=NULL]
+  raw_location[,country_local:=NULL]
+  raw_location[,country_patent:=NULL]
   #unify "" and NA, which the code would treat as different values
   raw_location[address =="",address :=NA]
   raw_location[state  =="",state  :=NA]
@@ -187,18 +223,10 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
   raw_location[,person_id:=NULL]
   raw_location[,first_time_location:=NULL]
   raw_location <- unique(raw_location)
-  
 
   raw_location <- merge(raw_location,
-                        city_country_codes,
-                        by="pair_city_region",
-                        all.x=TRUE)
-  
-  
-  
-  raw_location <- merge(raw_location,
                         city_data,
-                        by="pair_city_region",
+                        by=c("pair_city_region"),
                         all.x=TRUE)
   
   #create the variables in the format expected by USPTO
@@ -309,7 +337,7 @@ if (location == "chicago_server"){
     
     raw_inventor <- merge(raw_inventor,
                           fread(paste(path_to_raw_downloaded_data,"/lexicon_inv.csv",sep=""),
-                                encoding="UTF-8")[,list(uuid=as.character(inv_person_id),inv_name)],
+                                encoding="UTF-8")[,list(uuid=as.character(inv_person_id),inv_name,inv_address)],
                           by=c("uuid"),
                           all.x=TRUE)
     
@@ -317,8 +345,12 @@ if (location == "chicago_server"){
     raw_inventor[grepl(inv_name,pattern="deceased",fixed = TRUE),deceased:=TRUE]
     raw_inventor[grepl(inv_name,pattern="gestorben",fixed = TRUE),deceased:=TRUE]
     raw_inventor[grepl(inv_name,pattern="verstorben",fixed = TRUE),deceased:=TRUE]
+    raw_inventor[grepl(inv_address,pattern="deceased",fixed = TRUE),deceased:=TRUE]
+    raw_inventor[grepl(inv_address,pattern="gestorben",fixed = TRUE),deceased:=TRUE]
+    raw_inventor[grepl(inv_address,pattern="verstorben",fixed = TRUE),deceased:=TRUE]
     raw_inventor[is.na(deceased),deceased:=FALSE]
     raw_inventor[,inv_name:=NULL]
+    raw_inventor[,inv_address:=NULL]
     
     raw_inventor <- merge(raw_inventor,
                                   fread(paste(path_to_output_data,"/bridge_raw_location_person.csv",sep=""),
@@ -359,7 +391,8 @@ if (location == "chicago_server"){
     rm(raw_inventor)
     gc()
     
-    
+    canopies[,.N,by="name_last"][,.N,by="N"][order(N)]
+    canopies[,.N,by="name_last"][N>1,.N]
   }
   
   
@@ -414,6 +447,21 @@ if (location == "chicago_server"){
                                 encoding="UTF-8")[,list(uuid=as.character(person_id),rawlocation_id )],
                           by=c("uuid"),
                           all.x=TRUE)
+    
+    
+    
+    
+    rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
+                   encoding="UTF-8")
+    rich2[,person_id:=as.numeric(person_id)]
+    raw_assignee <- merge(raw_assignee,
+                          unique(rich2[,list(patstat_id ,person_id=as.character(person_id))],by="person_id"),
+                          by.x="uuid",
+                          by.y="person_id",
+                          all.x=TRUE)
+    
+    
+    raw_assignee[!is.na(patstat_id),assignee_id:=assignee_id[[1]],by="patstat_id"]
     
     
     setkey(raw_assignee,uuid)
@@ -543,7 +591,7 @@ if(1==2){
   
   original_inv_lexicon <- merge(fread(paste(path_to_raw_downloaded_data,"lexicon_inv.csv",sep=""),
                                       encoding="UTF-8"),
-                                fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_inventors/localization_data.csv",sep=""),
+                                fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_inventors/localization_data_",version_of_localizations,".csv",sep=""),
                                       encoding="UTF-8"),
                                 by="inv_person_id",
                                 all.x=TRUE)

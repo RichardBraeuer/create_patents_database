@@ -1,29 +1,33 @@
 #install.packages("RecordLinkage")
 #install.packages("stringdist")
+
 print("08a: Link applicants to registry")
 suppressWarnings({
   dir.create(paste0(path_to_output_data,"/link_gdr_registry/"))
 })
 library("data.table")
 library("ggplot2")
-
+version_of_localizations <- "old"
 if (link_to_registry == TRUE) {
 
+  
+#load data from patents and select gdr patents
 {
+
   #load the relevant original data
-  apl_lexicon <- fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/lexicon_apl",".csv",sep=""),
+  apl_lexicon <- fread(file=paste(path_to_raw_downloaded_data,"/","/lexicon_apl",".csv",sep=""),
                        encoding = "UTF-8")
   test <- apl_lexicon[31835230==apl_eee_hrm_id]
   setkey(apl_lexicon,apl_eee_hrm_id)
   
   apl_lexicon<- merge(apl_lexicon,
-                      fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/","/localization_applicants/localization_data.csv",sep=""),
+                      fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/","/localization_applicants/localization_data_",version_of_localizations,".csv",sep=""),
                             encoding = "UTF-8"),
                       by="apl_person_id",
                       all.x=TRUE)
   setkey(apl_lexicon,apl_eee_hrm_id)
   
-  original_apl_patent <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/raw_data_apl_patent",".csv",sep=""))
+  original_apl_patent <- fread(paste(path_to_raw_downloaded_data,"/","/patents_apl",".csv",sep=""))
   setkey(original_apl_patent,apl_eee_hrm_id)
   
   
@@ -112,63 +116,32 @@ if (link_to_registry == TRUE) {
   setkey(names_to_match_strict_def,apl_person_id)
   # 
   # time <- proc.time()
-  # 
-  # localize_strings(data_table = names_to_match_strict_def[1:100],
-  #                  vector_of_names_of_variables_to_localize = c("apl_address","apl_name"),
-  #                  vector_variables_country_codes = c("apl_ctry"),
-  #                  id_variables = c("apl_person_id"),
-  #                  extract_clean_names_from =c("apl_name"),
-  #                  threshold_nr_words_to_consider = 0,
-  #                  extract_country_codes="no",
-  #                  extract_firstname_info="no",
-  #                  extract_city_localization="YES",
-  #                  threshold_acceptance=0.5
-  # )
-  # time_100_matches <- proc.time() - time
-  # 
-  # 
-  # print(paste("Localization of gdr applicants started", format(Sys.time(), "%b %d %X %Y"), "Expected minutes of runtime:",round((time_100_matches[3]*nrow(names_to_match_strict_def)/100)/60,digits=2)))
-  # 
-  # 
-  # 
-  # localized_apl_data <- localize_strings(data_table = names_to_match_strict_def,
-  #                                        vector_of_names_of_variables_to_localize = c("apl_address","apl_name"),
-  #                                        vector_variables_country_codes = c("apl_ctry"),
-  #                                        id_variables = c("apl_person_id"),
-  #                                        extract_clean_names_from =c("apl_name"),
-  #                                        threshold_nr_words_to_consider = 0,
-  #                                        extract_country_codes="no",
-  #                                        extract_firstname_info="no",
-  #                                        extract_city_localization="YES",
-  #                                        threshold_acceptance=0.5
-  # )
-  # 
-  # localized_apl_data[,list(apl_person_id,city_name,dummy_ex_gdr,meta_info_city_match,county,cleaned_name)]
-  # 
-  # names_to_match_strict_def <- merge(names_to_match_strict_def,
-  #                                    localized_apl_data,
-  #                                    by="apl_person_id",
-  #                                    all.x=TRUE)
-  # 
-  # 
-  city_data <- fread(file=paste(path_tools_data,"/localities_data/city_data.csv",sep=""),
+ 
+  city_data <- fread(file=paste(path_tools_data,"/localities_data/city_data_",version_of_localizations,".csv",sep=""),
                      encoding = "UTF-8")
-  
+
   names_to_match_strict_def <- merge(names_to_match_strict_def,
                                      city_data[,list(pair_city_region,city_name,NUTS2_equivalent, NUTS2_equivalent_code,county)],
                                      by="pair_city_region",
                                      all.x=TRUE)
+  
+  
+  
+  names_to_match_strict_def[,pure_name:=gsub(pattern="veb",replacement="",x=apl_name)]
+  names_to_match_strict_def[,pure_name:=gsub(pattern="kombinat",replacement="",x=pure_name)]
+  names_to_match_strict_def[,pure_name:=gsub(pattern="gmbh",replacement="",x=pure_name)]
+  names_to_match_strict_def[,pure_name:=gsub(pattern="ag",replacement="",x=pure_name)]
+  names_to_match_strict_def[,pure_name:=gsub(pattern="gesellschaft",replacement="ges",x=pure_name)]
+  clean_string_for_city_matching(names_to_match_strict_def,"pure_name")
+  names_to_match_strict_def[,pure_name:=gsub(pattern=" ",replacement="",x=pure_name)]
+  
+  names_to_match_strict_def["veb berlin chemie"==apl_name,list(apl_name,pure_name)]
+  
+  
+  
 }
 
-names_to_match_strict_def[,pure_name:=gsub(pattern="veb",replacement="",x=apl_name)]
-names_to_match_strict_def[,pure_name:=gsub(pattern="kombinat",replacement="",x=pure_name)]
-names_to_match_strict_def[,pure_name:=gsub(pattern="gmbh",replacement="",x=pure_name)]
-names_to_match_strict_def[,pure_name:=gsub(pattern="ag",replacement="",x=pure_name)]
-names_to_match_strict_def[,pure_name:=gsub(pattern="gesellschaft",replacement="ges",x=pure_name)]
-clean_string_for_city_matching(names_to_match_strict_def,"pure_name")
-names_to_match_strict_def[,pure_name:=gsub(pattern=" ",replacement="",x=pure_name)]
-
-names_to_match_strict_def["veb berlin chemie"==apl_name,list(apl_name,pure_name)]
+  
 # load the data sbr_id data with which to merge
 # alternative: VEB Betriebsliste, but does not 
 # contain sbr_id, so where would that leave us?
@@ -232,19 +205,22 @@ names_to_match_strict_def["veb berlin chemie"==apl_name,list(apl_name,pure_name)
   gdr_registry_names <- unique(gdr_registry_names[,list(gdr_county_code,short_name, sbr_id,gdr_county_name, city_name, county, latitude, longitude)])
   
   
+  gdr_registry_names[,pure_name_reg:=tolower(short_name)]
+  gdr_registry_names[,pure_name_reg:=gsub(pattern="veb",replacement="",x=pure_name_reg)]
+  gdr_registry_names[,pure_name_reg:=gsub(pattern="kombinat",replacement="",x=pure_name_reg)]
+  gdr_registry_names[,pure_name_reg:=gsub(pattern="gmbh",replacement="",x=pure_name_reg)]
+  gdr_registry_names[,pure_name_reg:=gsub(pattern="gesellschaft",replacement="ges",x=pure_name_reg)]
+  gdr_registry_names[,pure_name_reg:=gsub(pattern="ag",replacement="",x=pure_name_reg)]
+  clean_string_for_city_matching(gdr_registry_names,"pure_name_reg")
+  gdr_registry_names[,pure_name_reg:=gsub(pattern=" ",replacement="",x=pure_name_reg)]
+  
+  
+  
 }
 
 
 
 
-gdr_registry_names[,pure_name_reg:=tolower(short_name)]
-gdr_registry_names[,pure_name_reg:=gsub(pattern="veb",replacement="",x=pure_name_reg)]
-gdr_registry_names[,pure_name_reg:=gsub(pattern="kombinat",replacement="",x=pure_name_reg)]
-gdr_registry_names[,pure_name_reg:=gsub(pattern="gmbh",replacement="",x=pure_name_reg)]
-gdr_registry_names[,pure_name_reg:=gsub(pattern="gesellschaft",replacement="ges",x=pure_name_reg)]
-gdr_registry_names[,pure_name_reg:=gsub(pattern="ag",replacement="",x=pure_name_reg)]
-clean_string_for_city_matching(gdr_registry_names,"pure_name_reg")
-gdr_registry_names[,pure_name_reg:=gsub(pattern=" ",replacement="",x=pure_name_reg)]
 
 
 
