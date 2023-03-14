@@ -4,7 +4,7 @@
 rm(list=setdiff(ls(), "syntax_path"))
 gc()
 
-location <- "IWH"
+location <- "chicago_server"
 
 set.seed(45678)
 
@@ -38,7 +38,7 @@ if (location == "IWH"){
   source(paste(syntax_path_tools,"/name_matching/name_matching_functions.R",sep=""))
 }
 if (location == "chicago_server"){
-  syntax_path <- "/share/akcigitusptolab/code/richard/epo/prepare EPO data/"
+  syntax_path <- "/share/akcigitusptolab/code/richard/prepare EPO data/"
   syntax_path_tools = "/share/akcigitusptolab/code/richard/tools/"
   path_tools_data ="/share/akcigitusptolab/data/tools/"
   source(paste(syntax_path_tools,"/localities_data/functions_for_localization.R",sep=""))
