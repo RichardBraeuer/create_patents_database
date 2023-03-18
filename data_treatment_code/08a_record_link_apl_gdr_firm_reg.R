@@ -7,7 +7,7 @@ suppressWarnings({
 })
 library("data.table")
 library("ggplot2")
-version_of_localizations <- "old"
+#version_of_localizations <- "old"
 if (link_to_registry == TRUE) {
 
   
@@ -138,6 +138,12 @@ if (link_to_registry == TRUE) {
   names_to_match_strict_def["veb berlin chemie"==apl_name,list(apl_name,pure_name)]
   
   
+  names_to_match_strict_def <- names_to_match_strict_def[country_code_city=="de",
+                                                         list(pure_name,apl_eee_hrm_id,
+                                                              country_code_city,
+                                                              county_code=as.numeric(county_code),
+                                                              county)]
+  
   
 }
 
@@ -202,7 +208,7 @@ if (link_to_registry == TRUE) {
   gdr_registry_names[!is.na(latitude )]
   
   
-  gdr_registry_names <- unique(gdr_registry_names[,list(gdr_county_code,short_name, sbr_id,gdr_county_name, city_name, county, latitude, longitude)])
+  gdr_registry_names <- unique(gdr_registry_names[,list(gdr_county_code,short_name, sbr_id,gdr_county_name, city_name, county, county_code ,latitude, longitude)])
   
   
   gdr_registry_names[,pure_name_reg:=tolower(short_name)]
@@ -215,39 +221,26 @@ if (link_to_registry == TRUE) {
   gdr_registry_names[,pure_name_reg:=gsub(pattern=" ",replacement="",x=pure_name_reg)]
   
   
-  
+  gdr_registry_names <- gdr_registry_names[,list(sbr_id,pure_name_reg,country_code_city="de",county_code,county)]
 }
 
 
 
 
 
+print(names_to_match_strict_def[,.N,by="county"])
+print(gdr_registry_names[,.N,by="county"])
 
 
-
-
-data_set_1 = unique(names_to_match_strict_def[,list(pure_name,
-                                                    county)])
-colnames(data_set_1)
-data_set_2 = unique(gdr_registry_names[,list(pure_name_reg,county)])
-colnames(data_set_2)
-varname_string_data_1 = "pure_name"
-varname_string_data_2 = "pure_name_reg"
-varname_string_block_var_both ="county"
-block_value=data.table(county="Chemnitz Stadt")
-block_var=varname_string_block_var_both
-
-print(typeof(data_set_1[,county]))
-print(typeof(data_set_2[,county]))
-
-
-match_result <-   fuzzy_name_match(data_set_1=names_to_match_strict_def,
-                                   data_set_2=gdr_registry_names,
+match_result <-   fuzzy_name_match(data_set_1=names_to_match_strict_def[,list(pure_name, apl_eee_hrm_id ,country_code_city, county_code)],
+                                   data_set_2=gdr_registry_names[!is.na(county_code )][,list(sbr_id,pure_name_reg,country_code_city="de",county_code)],
                                    varname_string_data_1="pure_name",
                                    varname_id_data_1="apl_eee_hrm_id",
                                    varname_string_data_2="pure_name_reg",
                                    varname_id_data_2="sbr_id",
-                                   varname_string_block_var_both)
+                                   varname_string_block_var_both=c("county_code","country_code_city"),
+                                   match_no_block=FALSE,
+                                   verbose=TRUE)
 
 
 match_result[,rank_fit := seq_len(.N),by="apl_eee_hrm_id"]
@@ -276,8 +269,7 @@ for (confidence_level in sort(unique(match_result[,merge_type]))) {
   print(match_result[merge_type==eval(confidence_level),list(merge_type,
                                                              pure_name,
                                                              pure_name_reg,
-                                                             wrong_percent=round(wrong_percent,digits = 2),
-                                                             str_dist_j =round(str_dist_j ,digits = 2) 
+                                                             criterium=round(criterium,digits = 2)
                                                              )])
 }
 
@@ -293,27 +285,23 @@ setkey(match_result,apl_eee_hrm_id)
 results_top_100 <- merge(top_100_gdr_patenters,
                          match_result[rank_fit==1 & nr_fits==1,
                                       list(merge_type,
-                                           county, 
+                                           county_code, 
                                            pure_name,
                                            pure_name_reg,
-                                           wrong_percent=round(wrong_percent,digits = 2),
-                                           str_dist,
-                                           str_dist_j,
+                                           criterium=round(criterium,digits = 2),
                                            apl_eee_hrm_id )],
                          by="apl_eee_hrm_id")
 
 print(results_top_100[,.N,by="merge_type"])
 
-results_top_100[,list(apl_name,DD,pure_name_reg,merge_type,wrong_percent,str_dist,str_dist_j)]
+results_top_100[,list(apl_name,DD,pure_name_reg,merge_type,criterium)]
 
 
-print(match_result[merge_type=="3tried_to_merge" & str_dist_j <0.74 & str_dist_j>0.70,
-                   list(county, 
+print(match_result[merge_type=="3tried_to_merge",
+                   list(county_code, 
                         pure_name,
                         pure_name_reg,
-                        wrong_percent=round(wrong_percent,digits = 2),
-                        str_dist,
-                        str_dist_j)])
+                        criterium=round(criterium,digits = 2))])
 
 
 fwrite(match_result[merge_type!="3tried_to_merge"&rank_fit==1 & nr_fits==1],
