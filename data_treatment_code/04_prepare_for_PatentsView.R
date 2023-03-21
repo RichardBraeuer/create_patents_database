@@ -13,6 +13,7 @@ city_data <- fread(file=paste(path_tools_data,"/localities_data/city_data_",vers
 
 #---list of inventors relevant for GDR
 #---#---#---#---#---#---#---#---#---#
+dir.create(paste(path_to_output_data,"/gdr_relevant_data/",sep=""))
 if (file.exists(paste(path_to_output_data,"/gdr_relevant_data/list_cleaned_ids_gdr.csv",sep="")) ==FALSE |
     file.exists(paste(path_to_output_data,"/gdr_relevant_data/list_patents_gdr.csv",sep=""))     ==FALSE |
     file.exists(paste(path_to_output_data,"/gdr_relevant_data/list_applicants_gdr.csv",sep=""))     ==FALSE 
@@ -148,6 +149,76 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
 
 
 
+#---list of inventors relevant for inventor matching
+#---#---#---#---#---#---#---#---#---#---#---#---#---#
+dir.create(paste(path_to_output_data,"/inv_matching_relevant_data/",sep=""))
+if (file.exists(paste(path_to_output_data,"/inv_matching_relevant_data/list_cleaned_ids_gdr.csv",sep="")) ==FALSE |
+    file.exists(paste(path_to_output_data,"/inv_matching_relevant_data/list_patents_gdr.csv",sep=""))     ==FALSE |
+    file.exists(paste(path_to_output_data,"/inv_matching_relevant_data/list_applicants_gdr.csv",sep=""))     ==FALSE 
+){
+  
+  
+  basis_match_data_selection <- merge(fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
+                                          encoding="UTF-8"),
+                                    unique(fread(paste(path_to_raw_downloaded_data,"/data_preparation/inventor_cleaned_names_list.csv",sep=""),
+                                                 encoding="UTF-8")[,list(inv_eee_hrm_id, cleaned_id)]),
+                                    by="inv_eee_hrm_id",
+                                    all.x=TRUE)
+  
+  
+  basis_match_data_selection[,inventor_id:=as.character(cleaned_id)]
+  
+  basis_match_data_selection <- merge(basis_match_data_selection,
+        countries_inv_matching_data,
+        by="appln_auth")
+  
+  list_cleaned_ids_match <- unique(basis_match_data_selection[,list(inv_person_id ,inventor_id)])
+  
+  
+  print(paste("nr of cleaned IDs for inv. matching data:",nrow(list_cleaned_ids_match)))
+  
+  fwrite(list_cleaned_ids_match,
+         file=paste(path_to_output_data,"/inv_matching_relevant_data/list_cleaned_ids_inv_matching.csv",sep=""),
+         quote=TRUE)
+  
+  
+  list_patents_match <- unique(basis_match_data_selection[,list(appln_nr_epodoc)])
+  
+  
+  print(paste("nr of patents in gdr data:",nrow(list_patents_match)))
+  
+  fwrite(list_patents_match,
+         file=paste(path_to_output_data,"/inv_matching_relevant_data/list_patents_inv_matching.csv",sep=""),
+         quote=TRUE)
+  
+  
+  list_apl_inv_matching<- unique(
+    merge(fread(paste(path_to_raw_downloaded_data,"patents_apl.csv",sep=""),
+                encoding="UTF-8"),
+          list_patents_match,
+          by="appln_nr_epodoc")[,list(apl_person_id)]
+  )
+  setkey(list_apl_inv_matching,apl_person_id)
+  
+  
+  rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
+                 encoding="UTF-8")
+  rich2[,person_id:=as.numeric(person_id)]
+  list_apl_inv_matching <- merge(unique(rich2[,list(patstat_id ,person_id)],by="person_id"),
+                                 list_apl_inv_matching,
+                        by.x="person_id",
+                        by.y="apl_person_id",
+                        all.x=TRUE)
+  
+  
+  fwrite(list_apl_inv_matching,
+         file=paste(path_to_output_data,"/inv_matching_relevant_data/list_applicants_gdr.csv",sep=""),
+         quote=TRUE)
+  
+  
+  
+}
+
 
 
 
@@ -259,45 +330,40 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
   #---#---#---#---#---#
   if (file.exists(paste(path_to_output_data,"/patent.tsv",sep="")) ==FALSE ){
   
-    patent<-data.table(number=numeric())
+  patent <-unique(rbindlist(list(
+    fread(paste(path_to_raw_downloaded_data,"patents_apl.csv",sep=""),
+                                  encoding="UTF-8")[
+                ,list(appln_nr_epodoc,appln_id,appln_auth,appln_filing_year)],
+    fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
+                        encoding="UTF-8")[
+                ,list(appln_nr_epodoc,appln_id,appln_auth,appln_filing_year)]
+    ))[,list(
+    id = as.character(appln_nr_epodoc),
+    type="utility",
+    number=appln_id,
+    country=appln_auth,
+    date=paste(as.character(appln_filing_year),"-01-01",sep=""),
+    kind="B2",
+    num_claims=20,
+    filename="xxx.jpg",
+    withdrawn=0
+  )])
     
-    if (location == "chicago_server"){
-      
-      patent <- fread(paste(path_to_raw_downloaded_data,"patstat_abstracts_en.csv",sep=""),
-                            encoding="UTF-8")[,list(number=appln_id,abstract=appln_abstract)]
-      patent <- merge(patent,
-                      fread(paste(path_to_raw_downloaded_data,"patstat_titles_en.csv",sep=""),
-                            encoding="UTF-8")[,list(number=appln_id,title=appln_title)],
-                      by="number",
-                      all.x=TRUE) 
-      
-    }
-    
-    
-    patent <- merge(patent,
-                    
-                    unique(rbindlist(list(
-                      fread(paste(path_to_raw_downloaded_data,"patents_apl.csv",sep=""),
-                            encoding="UTF-8")[
-                              ,list(appln_nr_epodoc,appln_id,appln_auth,appln_filing_year)],
-                      fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
-                            encoding="UTF-8")[
-                              ,list(appln_nr_epodoc,appln_id,appln_auth,appln_filing_year)]
-                    ))[,list(
-                      id = as.character(appln_nr_epodoc),
-                      type="utility",
-                      number=appln_id,
-                      country=appln_auth,
-                      date=paste(as.character(appln_filing_year),"-01-01",sep=""),
-                      kind="B2",
-                      num_claims=20,
-                      filename="xxx.jpg",
-                      withdrawn=0
-                    )]),
-                    by="number",
-                    all.y=TRUE) 
-    
-    
+if (location == "chicago_server"){
+  
+  patent <- merge(patent,
+                  fread(paste(path_to_raw_downloaded_data,"patstat_abstracts_en.csv",sep=""),
+                        encoding="UTF-8")[,list(number=appln_id,title=appln_title)],
+                  by="number",
+                  all.x=TRUE)
+  
+  patent <- merge(patent,
+                  fread(paste(path_to_raw_downloaded_data,"patstat_titles_en.csv",sep=""),
+                        encoding="UTF-8")[,list(number=appln_id,abstract=appln_abstract)],
+                  by="number",
+                  all.x=TRUE) 
+  
+}
     
     setkey(patent,id)
     fwrite(patent,file = paste(path_to_output_data,"patent.tsv",sep=""),
@@ -396,7 +462,8 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
     rm(raw_inventor)
     gc()
     
-    
+    canopies[,.N,by="name_last"][,.N,by="N"][order(N)]
+    canopies[,.N,by="name_last"][N>1,.N]
   }
   
   
@@ -451,7 +518,6 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
                                 encoding="UTF-8")[,list(uuid=as.character(person_id),rawlocation_id )],
                           by=c("uuid"),
                           all.x=TRUE)
-    
     
     
     
