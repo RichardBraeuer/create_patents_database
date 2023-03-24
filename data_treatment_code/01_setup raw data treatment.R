@@ -27,7 +27,7 @@ path = "s:/PROJEKTE/Treuhand/data/temp/gdr_patent_data/inventor project/fused da
 #path = "C:/inventor_firm_empirics/"
 
 data_source <- paste(path ,"/data/treated_employer_employee_file.csv", sep="") 
-data_source_raw_data <- paste(path_temp_data_all,"gdr_patent_data/inventor project/fused data/data/Downloaded raw data.csv",sep="")
+#data_source_raw_data <- paste(path_temp_data_all,"gdr_patent_data/inventor project/fused data/data/Downloaded raw data.csv",sep="")
 syntax_path_inventor_code = "s:/PROJEKTE/Inventor_Matching_PATSTAT/"
 
 
@@ -87,6 +87,31 @@ meta_data_on_time_periods <- data.table(
   
 )
 setkey(meta_data_on_time_periods,quarter)
+
+
+countries_inv_matching_data <- data.table(
+  
+  appln_auth = c('FR', 'ES', 'GB', 'IT', 'PT',
+            'SE', 'NL', 'BE', 'DK', 'GR',
+            'DE', 'LU', 'US', 'JP',
+            'EE', 'LT', 'LV', 'PL', 'SK',
+            'SI', 'HU', 'CZ', 'RU','UA', 'KR',
+            'TW', 'EP', 'IE', 'FI', 'ZA'),
+  country_name = c("France","Spain","Great Britain","Italy","Portugal",
+           "Schweden","Netherlands","Belgium","Denmark","Greece",
+           "Germany","Luxembourg","United States","Japan",
+           "Estonia","Lithuania","Latvia","Poland","Slovakia",
+           "Slovenia","Hungary","Czech Republic","Russia","Ukraine","South Korea",
+           "Taiwan","Europe","Ireland","Finland","South Africa"),
+  country_group=c("Europe","Europe","Europe","Europe","Europe",
+          "Europe","Europe","Europe","Europe","Europe",
+          "Europe","Europe","USA","Japan",
+          "Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc",
+          "Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Korea & Taiwan",
+          "Korea & Taiwan","Europe","Europe","Europe","South Africa")
+  
+)
+
 
 
 
