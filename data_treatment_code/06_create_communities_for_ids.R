@@ -15,17 +15,16 @@ ipc_classes_for_patents  <- fread(file = paste(path_to_raw_downloaded_data,"ipc.
 #the patent family counts for all inventors) par-
 #ticipating in any patent of the family
 ipc_classes_for_patent_families <-unique(ipc_classes_for_patents[,list(docdb_family_id, ipc_class_symbol)])
-
 #-------------------------
 #Read in disambiguation result
 #-------------------------
-if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/","PatentsView_identifiers.csv",sep=""))==TRUE){
-  PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/","PatentsView_identifiers.csv",sep=""),
+if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+  PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                    encoding="UTF-8"
   )
 }else{
-  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/","/","PatentsView_identifiers.csv",sep=""))==TRUE){
-    PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/","/","PatentsView_identifiers.csv",sep=""),
+  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+    PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                      encoding="UTF-8"
     )
   }

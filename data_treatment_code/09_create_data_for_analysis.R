@@ -69,13 +69,16 @@ setkey(original_apl_lexicon,apl_person_id)
   
   #Read in disambiguation result
   #---#---#---#---#---#---#---#
-  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/","PatentsView_identifiers.csv",sep=""))==TRUE){
-    PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/","PatentsView_identifiers.csv",sep=""),
+  #-------------------------
+  #Read in disambiguation result
+  #-------------------------
+  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+    PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                      encoding="UTF-8"
     )
   }else{
-    if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/","/","PatentsView_identifiers.csv",sep=""))==TRUE){
-      PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/","/","PatentsView_identifiers.csv",sep=""),
+    if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+      PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                        encoding="UTF-8"
       )
     }
@@ -91,7 +94,6 @@ setkey(original_apl_lexicon,apl_person_id)
                                      encoding="UTF-8"
     )
   }
-  
   #sbr ids
   #---#---#---#---#
   bridge_sbr_id_patent_data <- unique(fread(file=paste(path_to_output_data,"/link_gdr_registry/","bridge_sbr_id_patent_data.csv",sep=""),

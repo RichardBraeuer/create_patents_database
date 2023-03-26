@@ -23,13 +23,13 @@ if (find_ipc_class_communites =="YES"){
   #-------------------------
   #Read in disambiguation result
   #-------------------------
-  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/","PatentsView_identifiers.csv",sep=""))==TRUE){
-  PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/","PatentsView_identifiers.csv",sep=""),
+  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+  PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                    encoding="UTF-8"
   )
   }else{
-    if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/","/","PatentsView_identifiers.csv",sep=""))==TRUE){
-      PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/","/","PatentsView_identifiers.csv",sep=""),
+    if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+      PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                        encoding="UTF-8"
       )
     }
