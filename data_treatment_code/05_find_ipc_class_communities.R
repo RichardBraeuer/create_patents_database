@@ -19,7 +19,7 @@ if (find_ipc_class_communites =="YES"){
     relevant_appln_ids <- merge(
       unique(fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
             encoding="UTF-8")[,list(appln_nr_epodoc,appln_id )]),
-      fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/list_patents_",data_name_short,".csv",sep="")),
+      fread(file=paste(path_to_output_data,"//",data_name,"/list_patents_",data_name_short,".csv",sep="")),
       by="appln_nr_epodoc"
     )
 
@@ -44,13 +44,13 @@ if (find_ipc_class_communites =="YES"){
   #-------------------------
   #Read in disambiguation result
   #-------------------------
-  if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
-  PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
+  if (file.exists(paste(path_to_output_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+  PatentsView_identifiers <- fread(paste(path_to_output_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                    encoding="UTF-8"
   )
   }else{
-    if (file.exists(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
-      PatentsView_identifiers <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
+    if (file.exists(paste(path_to_output_data,"/data_preparation/","/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+      PatentsView_identifiers <- fread(paste(path_to_output_data,"/data_preparation/","/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                        encoding="UTF-8"
       )
     }
@@ -78,7 +78,7 @@ if (find_ipc_class_communites =="YES"){
     
     inventors_of_patents <- merge(
       inventors_of_patents,
-      unique(fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/list_cleaned_ids_",data_name_short,".csv",sep=""))[,
+      unique(fread(file=paste(path_to_output_data,"//",data_name,"/list_cleaned_ids_",data_name_short,".csv",sep=""))[,
                       list(inv_person_id)]),
       by="inv_person_id"
     )
