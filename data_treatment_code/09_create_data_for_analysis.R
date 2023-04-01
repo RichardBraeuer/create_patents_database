@@ -67,8 +67,6 @@ setkey(original_apl_lexicon,apl_person_id)
                                        encoding="UTF-8")
   setkey(inventor_cleaned_names_list,inv_eee_hrm_id)
   
-  #Read in disambiguation result
-  #---#---#---#---#---#---#---#
   #-------------------------
   #Read in disambiguation result
   #-------------------------
@@ -83,12 +81,13 @@ setkey(original_apl_lexicon,apl_person_id)
       )
     }
   }
-  setnames(PatentsView_identifiers,
-           old=c("og_id"),
-           new=c("inv_person_id"))
-  setkey(PatentsView_identifiers,inv_person_id)
-  PatentsView_identifiers[,inv_person_id:=as.numeric(inv_person_id)]
-  
+  if (exists("PatentsView_identifiers"==TRUE)){
+    setnames(PatentsView_identifiers,
+             old=c("og_id"),
+             new=c("inv_person_id"))
+    setkey(PatentsView_identifiers,inv_person_id)
+    PatentsView_identifiers[,inv_person_id:=as.numeric(inv_person_id)]
+  }
   if (exists("PatentsView_identifiers"==FALSE)){
     PatentsView_identifiers <- fread(file=paste(path_to_output_data,"/",data_name,"/list_cleaned_ids_",data_name_short,".csv",sep=""),
                                      encoding="UTF-8"

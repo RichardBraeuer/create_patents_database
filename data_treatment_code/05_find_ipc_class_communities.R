@@ -14,12 +14,33 @@ if (find_ipc_class_communites =="YES"){
   #-------------------------
   #patent level
   ipc_classes_for_patents  <- fread(file = paste(path_to_raw_downloaded_data,"ipc.csv", sep=""))
-  
+  if (data_name!=""){
+
+    relevant_appln_ids <- merge(
+      unique(fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
+            encoding="UTF-8")[,list(appln_nr_epodoc,appln_id )]),
+      fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/list_patents_",data_name_short,".csv",sep="")),
+      by="appln_nr_epodoc"
+    )
+
+    ipc_classes_for_patents  <- merge(
+      ipc_classes_for_patents,
+      relevant_appln_ids,
+      by="appln_id"
+    )
+    }
   #patent family level (any patent class somewhere in 
   #the patent family counts for all inventors) par-
   #ticipating in any patent of the family
-  ipc_classes_for_patent_families <-unique(ipc_classes_for_patents[,list(docdb_family_id, ipc_class_symbol)])
-  
+  ipc_classes_for_patent_families <-unique(ipc_classes_for_patents[,list(docdb_family_id,appln_id, ipc_class_symbol)])
+  if (data_name!=""){
+    ipc_classes_for_patent_families  <- merge(
+      ipc_classes_for_patent_families,
+      relevant_appln_ids,
+      by="appln_id"
+    )
+  }
+  ipc_classes_for_patent_families <-unique(ipc_classes_for_patent_families[,list(docdb_family_id, ipc_class_symbol)])
   #-------------------------
   #Read in disambiguation result
   #-------------------------
@@ -34,12 +55,13 @@ if (find_ipc_class_communites =="YES"){
       )
     }
   }
+  if (exists("PatentsView_identifiers"==TRUE)){
   setnames(PatentsView_identifiers,
            old=c("og_id"),
            new=c("inv_person_id"))
   setkey(PatentsView_identifiers,inv_person_id)
   PatentsView_identifiers[,inv_person_id:=as.numeric(inv_person_id)]
-  
+  }
   if (exists("PatentsView_identifiers"==FALSE)){
     PatentsView_identifiers <- fread(file=paste(path_to_output_data,"/",data_name,"/list_cleaned_ids_",data_name_short,".csv",sep=""),
                                      encoding="UTF-8"
@@ -52,7 +74,15 @@ if (find_ipc_class_communites =="YES"){
   inventors_of_patents <- fread(file = paste(path_to_raw_downloaded_data, "patents_inv",".csv", sep=""),
                                 encoding="UTF-8")[,list(inv_person_id,year = min(appln_filing_year)), by="docdb_family_id"]
     
-
+  if (data_name!=""){
+    
+    inventors_of_patents <- merge(
+      inventors_of_patents,
+      unique(fread(file=paste(path_to_raw_downloaded_data,"/data_preparation/",data_name,"/list_cleaned_ids_",data_name_short,".csv",sep=""))[,
+                      list(inv_person_id)]),
+      by="inv_person_id"
+    )
+  }
   inventors_of_patents <- merge(
     PatentsView_identifiers,
     inventors_of_patents,
