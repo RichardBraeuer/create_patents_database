@@ -57,7 +57,7 @@ if (find_ipc_class_communites =="YES"){
   }
   if (exists("PatentsView_identifiers")==TRUE){
   setnames(PatentsView_identifiers,
-           old=c("og_id"),
+           old=c("old_id"),
            new=c("inv_person_id"))
   setkey(PatentsView_identifiers,inv_person_id)
   PatentsView_identifiers[,inv_person_id:=as.numeric(inv_person_id)]

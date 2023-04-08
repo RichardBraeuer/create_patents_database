@@ -4,7 +4,7 @@
 rm(list=setdiff(ls(), "syntax_path"))
 gc()
 
-location <- "IWH"
+location <- "chicago_server"
 
 set.seed(45678)
 
@@ -38,7 +38,7 @@ if (location == "IWH"){
   source(paste(syntax_path_tools,"/name_matching/name_matching_functions.R",sep=""))
 }
 if (location == "chicago_server"){
-  syntax_path <- "/share/akcigitusptolab/code/richard/epo/prepare EPO data/"
+  syntax_path <- "/share/akcigitusptolab/code/richard/prepare EPO data/"
   syntax_path_tools = "/share/akcigitusptolab/code/richard/tools/"
   path_tools_data ="/share/akcigitusptolab/data/tools/"
   source(paste(syntax_path_tools,"/localities_data/functions_for_localization.R",sep=""))
@@ -51,8 +51,8 @@ if (location == "chicago_server"){
   #data used for different projects. If left as ""
   #the entire data is used
   
-data_name <- "ussr_relevant_data"
-data_name_short <- "ussr"
+data_name <- "inv_matching_relevant_data"
+data_name_short <- "inv_matching"
 id_variable_to_use <- "inventor_id"
 version_of_localizations <- "2023_01_05"
 
@@ -107,7 +107,12 @@ source(paste0(syntax_path,"/data_treatment_code/08a_record_link_apl_gdr_firm_reg
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
 create_final_data<-TRUE
 source(paste0(syntax_path,"/data_treatment_code/09_create_data_for_analysis.R"))
-# 
+
+#options and launch for chapter 08_create_data_for_analysis.R
+#--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
+create_final_data<-TRUE
+source(paste0(syntax_path,"/data_treatment_code/09a_create_smaller_data_sets.R"))
+## 
 # library(parallel)
 # library(foreach)
 # cl <- parallel::makeCluster(2)

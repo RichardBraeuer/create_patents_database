@@ -212,7 +212,7 @@ if (file.exists(paste(path_to_output_data,"/inv_matching_relevant_data/list_clea
   
   
   fwrite(list_apl_inv_matching,
-         file=paste(path_to_output_data,"/inv_matching_relevant_data/list_applicants_gdr.csv",sep=""),
+         file=paste(path_to_output_data,"/inv_matching_relevant_data/list_applicants_inv_matching.csv",sep=""),
          quote=TRUE)
   
   

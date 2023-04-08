@@ -52,7 +52,7 @@ setkey(original_apl_lexicon,apl_person_id)
   
   #ipc communities inventors
   #---#---#---#---#---#---#
-  community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/","/community_statistics_per_inventor",".csv", sep=""),
+  community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/",data_name,"/community_statistics_per_inventor",".csv", sep=""),
                                              encoding="UTF-8") 
   
   
@@ -77,7 +77,7 @@ setkey(original_apl_lexicon,apl_person_id)
     }
   if (exists("PatentsView_identifiers")==TRUE){
     setnames(PatentsView_identifiers,
-             old=c("og_id"),
+             old=c("old_id"),
              new=c("inv_person_id"))
     setkey(PatentsView_identifiers,inv_person_id)
     PatentsView_identifiers[,inv_person_id:=as.numeric(inv_person_id)]
@@ -218,7 +218,7 @@ fwrite(gdr_inv_patent,
   
   gdr_apl_patent <- merge(gdr_apl_patent,
                           enriched_apl_id_lexicon[,list(apl_person_id,apl_rl_cl_uni_id)],
-                          by="apl_person_id",)
+                          by="apl_person_id")
   
   fwrite(gdr_apl_patent,
          paste(path_to_output_data,"/","/raw_data_apl_patent",".csv",sep=""))

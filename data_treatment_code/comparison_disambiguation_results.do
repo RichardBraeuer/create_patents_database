@@ -1,18 +1,20 @@
 global test = "" //1:100
 
-global name_data = "gdr_relevant_data"
-//contains e.g. the file patents_inv.csv created by the download code
-global dir_with_og_data = "s:/PROJEKTE/Epo_micro_data/data/"
-//contains the disambiguation results from PatentsView, e.g. the subfolder "invenors"
-global dir_with_PatentsView_results = "s:/PROJEKTE/Epo_micro_data/data/data_preparation/${name_data}/PatentsView disambiguation/"
-//contains the report of the analysis 
-global dir_for_analysis_outcomes = "s:/PROJEKTE/Epo_micro_data/data/data_preparation/${name_data}/PatentsView disambiguation/"
-//contains the disambiguated assembled data set
-global dir_for_data_outcomes = "s:/PROJEKTE/Epo_micro_data/data/data_preparation/${name_data}/"
-//contains the syntax
-global dir_for_syntax = "s:/PROJEKTE/Epo_micro_data/do/data_treatment_code/"
+global base_folder = "/share/akcigitusptolab/data/epo/original data/"
 
-global designations_subresults = "results_gdr_liberal results_gdr_conservative"
+global name_data = ""
+//contains e.g. the file patents_inv.csv created by the download code
+global dir_with_og_data = "${base_folder}//"
+//contains the disambiguation results from PatentsView, e.g. the subfolder "invenors"
+global dir_with_PatentsView_results = "${base_folder}//data_preparation/${name_data}/PatentsView disambiguation/"
+//contains the report of the analysis 
+global dir_for_analysis_outcomes = "${base_folder}//data_preparation/${name_data}/PatentsView disambiguation/"
+//contains the disambiguated assembled data set
+global dir_for_data_outcomes = "${base_folder}/${name_data}/data_preparation/PatentsView disambiguation/inventors/"
+//contains the syntax
+global dir_for_syntax = "/share/akcigitusptolab/code/richard/prepare EPO data/data_treatment_code/"
+
+global designations_subresults =  `""""'
 
 
 do "${dir_for_syntax}/comparison_disambiguation_results.ado"
@@ -73,7 +75,7 @@ export delimited "${dir_for_data_outcomes}/PatentsView_identifiers.csv", replace
 //-------------------------\\
 {
 	
-import delimited "${dir_for_data_outcomes}/PatentsView_identifiers.csv", clear
+import delimited "${dir_for_data_outcomes}/PatentsView_identifiers.csv", clear  varnames(1)
 
 
 find_id_similarities id_results_gdr_liberal id_results_gdr_conservative, title(lib_vs_con)

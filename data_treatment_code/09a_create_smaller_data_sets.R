@@ -27,8 +27,7 @@ for (sub_data_path in list_of_data_paths) {
                                by="appln_nr_epodoc")
   
   fwrite(raw_data_inv_patent,
-         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_inv_patent",".csv",sep=""),
-        encoding="UTF-8")
+         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_inv_patent",".csv",sep=""))
   
   
   
@@ -69,8 +68,7 @@ for (sub_data_path in list_of_data_paths) {
                                by="appln_nr_epodoc")
   
   fwrite(raw_data_apl_patent,
-         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_apl_patent",".csv",sep=""),
-         encoding="UTF-8")
+         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_apl_patent",".csv",sep=""))
   
   
   
@@ -106,15 +104,14 @@ for (sub_data_path in list_of_data_paths) {
   
   enriched_apl_id_lexicon_sub <- merge(
     enriched_apl_id_lexicon,
-      unique(fread(file=paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/list_applicants_",data_name_short,".csv",sep=""))[,
+      unique(fread(file=paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/list_applicants_",sub_data_name,".csv",sep=""))[,
                                                                                                                      list(apl_person_id=person_id)]),
       by="apl_person_id"
 )
   
   
   fwrite(enriched_apl_id_lexicon_sub,
-         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/enriched_apl_id_lexicon",".csv",sep=""),
-         encoding="UTF-8")
+         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/enriched_apl_id_lexicon",".csv",sep=""))
   
   
   
@@ -149,15 +146,14 @@ for (sub_data_path in list_of_data_paths) {
   
   enriched_inv_id_lexicon_sub <- merge(
     enriched_inv_id_lexicon,
-    unique(fread(file=paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/list_applicants_",data_name_short,".csv",sep=""))[,
+    unique(fread(file=paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/list_applicants_",sub_data_name,".csv",sep=""))[,
                                                                                                                                         list(inv_person_id=person_id)]),
     by="inv_person_id"
   )
   
   
   fwrite(enriched_inv_id_lexicon_sub,
-         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/enriched_inv_id_lexicon",".csv",sep=""),
-         encoding="UTF-8")
+         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/enriched_inv_id_lexicon",".csv",sep=""))
   
   
   
