@@ -47,40 +47,34 @@ setkey(original_apl_lexicon,apl_person_id)
   
   #localization inventors
   #---#---#---#---#---#---#
-  localization_inv <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_inventors/localization_data.csv",sep=""),
+  localization_inv <- fread(paste(path_to_output_data,"/data_preparation/localization_inventors/localization_data.csv",sep=""),
         encoding="UTF-8")
   
   #ipc communities inventors
   #---#---#---#---#---#---#
-  community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/",data_name,"/community_statistics_per_inventor",".csv", sep=""),
+  community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/","/community_statistics_per_inventor",".csv", sep=""),
                                              encoding="UTF-8") 
   
   
   #localization applicants
   #---#---#---#---#---#---#
-  localization_apl <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/localization_applicants/localization_data.csv",sep=""),
+  localization_apl <- fread(paste(path_to_output_data,"/data_preparation/localization_applicants/localization_data.csv",sep=""),
                             encoding="UTF-8")
   
   #cleaned name ids
   #---#---#---#---#
-  inventor_cleaned_names_list <- fread(paste(path_to_raw_downloaded_data,"/data_preparation/inventor_cleaned_names_list.csv",sep=""),
+  inventor_cleaned_names_list <- fread(paste(path_to_output_data,"/data_preparation/inventor_cleaned_names_list.csv",sep=""),
                                        encoding="UTF-8")
   setkey(inventor_cleaned_names_list,inv_eee_hrm_id)
   
   #-------------------------
   #Read in disambiguation result
   #-------------------------
-  if (file.exists(paste(path_to_output_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
-    PatentsView_identifiers <- fread(paste(path_to_output_data,"/data_preparation/",data_name,"/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
-                                     encoding="UTF-8"
-    )
-  }else{
-    if (file.exists(paste(path_to_output_data,"/data_preparation/","/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
+  if (file.exists(paste(path_to_output_data,"/data_preparation/","/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""))==TRUE){
       PatentsView_identifiers <- fread(paste(path_to_output_data,"/data_preparation/","/PatentsView disambiguation/inventors/PatentsView_identifiers.csv",sep=""),
                                        encoding="UTF-8"
       )
     }
-  }
   if (exists("PatentsView_identifiers")==TRUE){
     setnames(PatentsView_identifiers,
              old=c("og_id"),
@@ -89,7 +83,7 @@ setkey(original_apl_lexicon,apl_person_id)
     PatentsView_identifiers[,inv_person_id:=as.numeric(inv_person_id)]
   }
   if (exists("PatentsView_identifiers")==FALSE){
-    PatentsView_identifiers <- fread(file=paste(path_to_output_data,"/",data_name,"/list_cleaned_ids_",data_name_short,".csv",sep=""),
+    PatentsView_identifiers <- fread(file=paste(path_to_output_data,"/","/list_cleaned_ids_",data_name_short,".csv",sep=""),
                                      encoding="UTF-8"
     )
   }
@@ -144,7 +138,7 @@ setkey(original_apl_lexicon,apl_person_id)
            old=id_variable_to_use,
            new="inv_rl_cl_uni_id")
   fwrite(enriched_inv_id_lexicon,
-         file=paste(path_to_output_data,"/",data_name,"/enriched_inv_id_lexicon",".csv",sep=""))
+         file=paste(path_to_output_data,"/","/enriched_inv_id_lexicon",".csv",sep=""))
   
   
   
@@ -165,7 +159,7 @@ setnames(gdr_inv_patent,
          old=id_variable_to_use,
          new="inv_rl_cl_uni_id")
 fwrite(gdr_inv_patent,
-       paste(path_to_output_data,"/",data_name,"/raw_data_inv_patent",".csv",sep=""))
+       paste(path_to_output_data,"/","/raw_data_inv_patent",".csv",sep=""))
 
 }
 
@@ -205,7 +199,7 @@ fwrite(gdr_inv_patent,
   enriched_apl_id_lexicon[!is.na(sbr_id),apl_rl_cl_uni_id:=max(apl_eee_hrm_id),by="sbr_id"]
   enriched_apl_id_lexicon[is.na(sbr_id),apl_rl_cl_uni_id:=apl_eee_hrm_id]
   enriched_apl_id_lexicon[,N:=NULL]
-  fwrite(enriched_apl_id_lexicon,file=paste(path_to_output_data,"/",data_name,"/enriched_apl_id_lexicon" ,".csv",sep=""))
+  fwrite(enriched_apl_id_lexicon,file=paste(path_to_output_data,"/","/enriched_apl_id_lexicon" ,".csv",sep=""))
   
   
   
@@ -227,7 +221,7 @@ fwrite(gdr_inv_patent,
                           by="apl_person_id",)
   
   fwrite(gdr_apl_patent,
-         paste(path_to_output_data,"/",data_name,"/raw_data_apl_patent",".csv",sep=""))
+         paste(path_to_output_data,"/","/raw_data_apl_patent",".csv",sep=""))
   
 }
 
