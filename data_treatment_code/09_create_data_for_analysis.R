@@ -30,7 +30,11 @@ original_apl_lexicon <- fread(paste(path_to_raw_downloaded_data,"lexicon_apl.csv
                               encoding="UTF-8")
 setkey(original_apl_lexicon,apl_person_id)
 
-
+#inv patent_data
+#---#---#---#---#
+patent_citations <- fread(paste(path_to_raw_downloaded_data,"patent_citations.csv",sep=""),
+                             encoding="UTF-8")
+setkey(patent_citations,appln_nr_epodoc)
 }
 
 
@@ -225,5 +229,21 @@ fwrite(gdr_inv_patent,
   
 }
 
+#----------------
+#create lexicon (apl)
+#----------------
+#the additional results from preparation have to be merged to lexicon
+#and an employer-employee file has to be created. Second, we merge all
+#info to PatentsView to create lexicon
+citations_family_citing_family <- unique(merge(patent_citations,
+                        unique(gdr_inv_patent[,list(appln_nr_epodoc)]),
+                        by="appln_nr_epodoc")[,list(docdb_family_id,citing_docdb_family_id)])[
+                          ,list(nr_citing_families_family=.N),by=c("docdb_family_id","citing_docdb_family_id")]
+
+fwrite(citations_family_citing_family,
+       file = paste(path_to_output_data,
+                   "citations_family_citing_family",".csv", sep="") )
+
+  
 }
 
