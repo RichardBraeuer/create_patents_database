@@ -149,8 +149,8 @@ for (sub_data_path in list_of_data_paths) {
   
   enriched_inv_id_lexicon_sub <- merge(
     enriched_inv_id_lexicon,
-    unique(fread(file=paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/list_applicants_",sub_data_name,".csv",sep=""))[,
-                                                                                                                                        list(inv_person_id=person_id)]),
+    unique(fread(file=paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/list_cleaned_ids_",sub_data_name,".csv",sep=""))[,
+                                                                                                                                        list(inv_person_id)]),
     by="inv_person_id"
   )
   
@@ -208,7 +208,8 @@ for (sub_data_path in list_of_data_paths) {
   nrow(pairings_inventor_firm[indicator_ambigous_which_firm==1])
   pairings_inventor_firm[,share_invested_in_match:=1/indicator_ambigous_which_firm,by=c("inv_rl_cl_uni_id","docdb_family_id")]
   
-  
+ 
+  pairings_inventor_firm[,inventors_per_invention:=uniqueN(inv_rl_cl_uni_id),by=c("docdb_family_id")]
   pairings_inventor_firm[,patent_value_match:=(1/inventors_per_invention)*(  share_invested_in_match),by=c("inv_rl_cl_uni_id","docdb_family_id")]
   
   max(pairings_inventor_firm[,patent_value_match])
@@ -246,13 +247,16 @@ for (sub_data_path in list_of_data_paths) {
   
   sub_citations_family_citing_family <- merge(
     citations_family_citing_family,
-    merge(fread(file = paste0(sub_data_path,"list_patents_",sub_data_name,".csv"),
+    unique(merge(fread(file = paste0(sub_data_path,"list_patents_",sub_data_name,".csv"),
                     encoding = "UTF-8"),
           unique(inv_patent[,list(docdb_family_id,appln_nr_epodoc)]),
-          by="appln_nr_epodoc"),
+          by="appln_nr_epodoc")[,list(docdb_family_id)]),
     by="docdb_family_id")
   
+  sub_citations_family_citing_family <- unique(sub_citations_family_citing_family)
   fwrite(sub_citations_family_citing_family,
-         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/citations_family_citing_family_",version_description,".csv",sep=""),
-        encoding="UTF-8")
+         paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/citations_family_citing_family_",version_description,".csv",sep="")
+ #        ,encoding="UTF-8"
+         )
 }
+

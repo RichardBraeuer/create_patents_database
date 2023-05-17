@@ -9,7 +9,7 @@ location <- "chicago_server"
 set.seed(45678)
 
 
-
+library("data.table")
 
 #Path to the data base
 #---#---#---#---#---#---#
@@ -55,6 +55,33 @@ data_name <- "inv_matching_relevant_data"
 data_name_short <- "inv_matching"
 id_variable_to_use <- "inventor_id"
 version_of_localizations <- "2023_01_05"
+
+
+#inv matching country groups
+#---#---#---#---#---#---#---#---#
+countries_inv_matching_data <- data.table(
+  
+  appln_auth = c('FR', 'ES', 'GB', 'IT', 'PT',
+                 'SE', 'NL', 'BE', 'DK', 'GR',
+                 'DE', 'LU', 'US', 'JP',
+                 'EE', 'LT', 'LV', 'PL', 'SK',
+                 'SI', 'HU', 'CZ', 'RU','UA', 'KR',
+                 'TW', 'EP', 'IE', 'FI', 'ZA'),
+  country_name = c("France","Spain","Great Britain","Italy","Portugal",
+                   "Schweden","Netherlands","Belgium","Denmark","Greece",
+                   "Germany","Luxembourg","United States","Japan",
+                   "Estonia","Lithuania","Latvia","Poland","Slovakia",
+                   "Slovenia","Hungary","Czech Republic","Russia","Ukraine","South Korea",
+                   "Taiwan","Europe","Ireland","Finland","South Africa"),
+  country_group=c("Europe","Europe","Europe","Europe","Europe",
+                  "Europe","Europe","Europe","Europe","Europe",
+                  "Europe","Europe","USA","Japan",
+                  "Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc",
+                  "Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Former Communist Bloc","Korea & Taiwan",
+                  "Korea & Taiwan","Europe","Europe","Europe","South Africa")
+  
+)
+
 
 
 #options and launch for chapter 01_localize_entries
@@ -111,6 +138,7 @@ source(paste0(syntax_path,"/data_treatment_code/09_create_data_for_analysis.R"))
 #options and launch for chapter 08_create_data_for_analysis.R
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
 create_final_data<-TRUE
+version_description <- "teams_Q2_2023"
 source(paste0(syntax_path,"/data_treatment_code/09a_create_smaller_data_sets.R"))
 ## 
 # library(parallel)

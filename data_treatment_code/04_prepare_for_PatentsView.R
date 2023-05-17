@@ -25,12 +25,29 @@ basis_gdr_data_selection <- merge(fread(paste(path_to_raw_downloaded_data,"paten
                               unique(fread(paste(path_to_raw_downloaded_data,"/data_preparation/inventor_cleaned_names_list.csv",sep=""),
                                            encoding="UTF-8")[,list(inv_eee_hrm_id, cleaned_id)]),
                               by="inv_eee_hrm_id",
-                              all.x=TRUE)[
+                              all.x=TRUE)
+
+
+basis_gdr_data_selection_apl <- fread(paste(path_to_raw_downloaded_data,"patents_apl.csv",sep=""),
+                                      encoding="UTF-8")
+basis_gdr_data_selection_apl[((apl_ctry == "DE" | apl_ctry == "DD") ),consider:=TRUE]
+
+basis_gdr_data_selection <- merge(basis_gdr_data_selection,
+                                  basis_gdr_data_selection_apl[consider==TRUE,list(appln_nr_epodoc,consider)],
+                                  all.x=TRUE,
+                                  by="appln_nr_epodoc")
+
+basis_gdr_data_selection[inv_ctry!="",consider:=FALSE]
+basis_gdr_data_selection[
                                 (inv_ctry=="DD"|inv_ctry=="DE") | 
                                 (appln_auth =="DD"|appln_auth =="DE")| 
                                 (appln_auth =="EP" & inv_ctry==""),
-                                list(inv_person_id ,inventor_id=as.character(cleaned_id),appln_nr_epodoc)
-                              ]
+                consider:=TRUE]
+
+basis_gdr_data_selection[,consider:=max(consider,na.rm=TRUE),by="appln_nr_epodoc"]
+
+basis_gdr_data_selection <- basis_gdr_data_selection[consider==TRUE,list(inv_person_id ,inventor_id=as.character(cleaned_id),appln_nr_epodoc)]
+
 
 list_cleaned_ids_gdr <- unique(basis_gdr_data_selection[,list(inv_person_id ,inventor_id)])
 
@@ -84,9 +101,10 @@ fwrite(list_apl_gdr,
 
 #---list of inventors relevant for USSR
 #---#---#---#---#---#---#---#---#---#
-dir.create(paste0(path_to_output_data,"/ussr_relevant_data/"))
+dir.create(paste(path_to_output_data,"/ussr_relevant_data/",sep=""))
 if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_ussr.csv",sep="")) ==FALSE |
-    file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_patents_ussr.csv",sep=""))     ==FALSE 
+    file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_patents_ussr.csv",sep=""))     ==FALSE |
+    file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_applicants_ussr.csv",sep=""))     ==FALSE 
 ){
   
   
@@ -168,7 +186,7 @@ if (file.exists(paste(path_to_output_data,"/inv_matching_relevant_data/list_clea
   
   basis_match_data_selection[,inventor_id:=as.character(cleaned_id)]
   
-  basis_match_data_selection <- merge(basis_match_data_selection,
+  basis_match_data_selection <- merge(basis_match_data_selection[appln_filing_year>=1975 & appln_filing_year<=2020],
         countries_inv_matching_data,
         by="appln_auth")
   
