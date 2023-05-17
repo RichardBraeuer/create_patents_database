@@ -133,7 +133,8 @@ ipc_classes_per_patent_inventor <- merge(ipc_classes_per_patent_inventor,
 
 ipc_classes_per_patent_inventor[ipc_class_symbol_4=="",community:=NA]
 
-ipc_classes_per_patent_inventor[!is.na(community),nr_inventions  :=uniqueN(docdb_family_id),by=c(id_variable_to_use)]
+ipc_classes_per_patent_inventor[#!is.na(community)
+  ,nr_inventions  :=uniqueN(docdb_family_id),by=c(id_variable_to_use)]
 
 
 #-------------------------------------------
