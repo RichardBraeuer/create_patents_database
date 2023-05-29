@@ -4,7 +4,7 @@
 rm(list=setdiff(ls(), "syntax_path"))
 gc()
 
-location <- "chicago_server"
+location <- "IWH"
 
 set.seed(45678)
 
@@ -19,7 +19,7 @@ if (location == "chicago_server"){
 }
 if (location == "IWH"){
   path_to_raw_downloaded_data <- "s:/PROJEKTE/Epo_micro_data/data/"
-  path_to_output_data <- "s:/PROJEKTE/Epo_micro_data/data/data_preparation/"
+  path_to_output_data <- "s:/PROJEKTE/Epo_micro_data/data/"
 }
   
 #Path to supporting info from THA
@@ -51,8 +51,8 @@ if (location == "chicago_server"){
   #data used for different projects. If left as ""
   #the entire data is used
   
-data_name <- "inv_matching_relevant_data"
-data_name_short <- "inv_matching"
+data_name <-""  #"inv_matching_relevant_data"
+data_name_short <-""  #"inv_matching"
 id_variable_to_use <- "inventor_id"
 version_of_localizations <- "2023_01_05"
 
@@ -83,25 +83,24 @@ countries_inv_matching_data <- data.table(
 )
 
 
-
 #options and launch for chapter 01_localize_entries
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
 redo_chunks <- FALSE
-redo_localizations <- TRUE
+redo_localizations <- FALSE
 use_old_resuts <-FALSE
 source(paste0(syntax_path,"/data_treatment_code/01_localize_entries.R"))
 
 
 #options and launch for chapter 02_match_inventor_names_to_wikipedia
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
-match_wikipedia_top_inventors <- "YES"
+match_wikipedia_top_inventors <- "no"
 rematch_wikipedia_top_inventors <- "no"
 source(paste0(syntax_path,"/data_treatment_code/02_match_inventor_names_to_wikipedia.R"))
 
 
 #options and launch for chapter 03_split_names_into_words_and_clean
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
-create_list_of_names <- "YES"
+create_list_of_names <- "no"
 source(paste0(syntax_path,"/data_treatment_code/03_split_names_into_words_and_clean.R"))
 
 
@@ -110,14 +109,16 @@ source(paste0(syntax_path,"/data_treatment_code/03_split_names_into_words_and_cl
 source(paste0(syntax_path,"/data_treatment_code/04_prepare_for_PatentsView.R"))
 
 
-#options and launch for chapter 01_localize_inventors
+#options and launch for chapter 05_find_ipc_class_communities.R
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
 find_ipc_class_communites="YES"
+node_variable <- "ipc_class_symbol_4"
 source(paste0(syntax_path,"/data_treatment_code/05_find_ipc_class_communities.R"))
 
 #options and launch for chapter 06_create_communities_for_ids.R
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
 inventor_statistics<-"YES"
+node_variable <- "ipc_class_symbol_4"
 source(paste0(syntax_path,"/data_treatment_code/06_create_communities_for_ids.R"))
 
 #options and launch for chapter 07_describe_original_patstat_data.R

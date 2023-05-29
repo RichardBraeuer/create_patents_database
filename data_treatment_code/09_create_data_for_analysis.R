@@ -7,14 +7,20 @@ if (create_final_data ==TRUE) {
 {
 #inv patent_data
 #---#---#---#---#
-original_inv_patent <- fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
-                             encoding="UTF-8")
+original_inv_patent <-unique(fread(paste(path_to_raw_downloaded_data,"patents_inv.csv",sep=""),
+                                    encoding="UTF-8")[,list(appln_id, appln_nr_epodoc, appln_auth, 
+                                                            appln_filing_year, docdb_family_id,
+                                                            inv_person_id, inv_han_id, 
+                                                            inv_eee_hrm_id, inv_ctry)])
 setkey(original_inv_patent,inv_person_id)
 
 #apl patent_data
 #---#---#---#---#
-original_apl_patent <- fread(paste(path_to_raw_downloaded_data,"patents_apl.csv",sep=""),
-                             encoding="UTF-8")
+original_apl_patent <- unique(fread(paste(path_to_raw_downloaded_data,"patents_apl.csv",sep=""),
+                             encoding="UTF-8")[,list(appln_id, appln_nr_epodoc, appln_auth, 
+                                                     appln_filing_year, docdb_family_id,
+                                                     apl_person_id, apl_han_id, 
+                                                     apl_eee_hrm_id, apl_ctry)])
 setkey(original_apl_patent,apl_person_id)
 
 
@@ -57,7 +63,7 @@ setkey(patent_citations,appln_id)
   
   #ipc communities inventors
   #---#---#---#---#---#---#
-  community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/",data_name,"/community_statistics_per_inventor",".csv", sep=""),
+  community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/",data_name,"/data_preparation/community_statistics_per_inventor",".csv", sep=""),
                                              encoding="UTF-8") 
   
   

@@ -27,26 +27,38 @@ if (link_to_registry == TRUE) {
                       all.x=TRUE)
   setkey(apl_lexicon,apl_eee_hrm_id)
   
-  original_apl_patent <- fread(paste(path_to_raw_downloaded_data,"/","/patents_apl",".csv",sep=""))
+  original_apl_patent <- unique(fread(paste(path_to_raw_downloaded_data,"/","/patents_apl",".csv",sep=""))[
+                    ,list(appln_id, appln_nr_epodoc, appln_auth, appln_filing_year, docdb_family_id,
+                          apl_person_id, apl_han_id, apl_eee_hrm_id, apl_ctry )])
   setkey(original_apl_patent,apl_eee_hrm_id)
   
   
   #chracterize the apl in terms of where they do their patenting
   #specifically, the share of patents in East Germany
-  original_apl_patent[appln_auth=="DD",patenting_loc:="DD"]
-  original_apl_patent[appln_auth=="DE",patenting_loc:="DE"]
-  original_apl_patent[appln_auth!="DE"&appln_auth!="DD",patenting_loc:="other"]
-  location_patent_apl <- dcast(
-    original_apl_patent[unique(original_apl_patent[appln_auth=="DD"| apl_ctry=="DD",list(apl_eee_hrm_id)]),
-                        list(nr_inventions=uniqueN(docdb_family_id)),
-                        by=c("apl_eee_hrm_id","patenting_loc")]
-    , apl_eee_hrm_id  ~ patenting_loc , value.var = "nr_inventions")
-  location_patent_apl[is.na(other),other:=0]
-  location_patent_apl[is.na(DD),DD:=0]
-  location_patent_apl[is.na(DE),DE:=0]
+  #original_apl_patent[appln_auth=="DD",patenting_loc:="DD"]
+  #original_apl_patent[appln_auth=="DE",patenting_loc:="DE"]
+  #original_apl_patent[appln_auth!="DE"&appln_auth!="DD",patenting_loc:="other"]
+  
+
+  location_patent_apl <- 
+    original_apl_patent[unique(original_apl_patent[appln_auth=="DD"| apl_ctry=="DD",list(apl_eee_hrm_id)])
+                        ,list(DD=sum(as.numeric(appln_auth=="DD")),
+                              DE=sum(as.numeric(appln_auth=="DE")),
+                              other=sum(as.numeric(appln_auth!="DE"&appln_auth!="DD"))),by="apl_eee_hrm_id"]
+    
+    # 
+    # dcast(
+    # original_apl_patent[unique(original_apl_patent[appln_auth=="DD"| apl_ctry=="DD",list(apl_eee_hrm_id)])][1:100,
+    #                     list(nr_inventions=uniqueN(docdb_family_id)),
+    #                     by=c("apl_eee_hrm_id","patenting_loc")]
+    # , apl_eee_hrm_id  ~ patenting_loc , value.var = "nr_inventions")
+  # location_patent_apl[is.na(other),other:=0]
+  # location_patent_apl[is.na(DD),DD:=0]
+  # location_patent_apl[is.na(DE),DE:=0]
   location_patent_apl[,share_patent_files_gdr:=DD/(DD+DE+other)]
   location_patent_apl[,rank_gdr_patents:=frankv(x=location_patent_apl,cols ="DD",ties.method = "random",order=c(-1))]
   
+  library(ggplot2)
   ggplot(data=location_patent_apl[share_patent_files_gdr>0],
          aes(x=share_patent_files_gdr)) + geom_histogram()
   
@@ -102,9 +114,8 @@ if (link_to_registry == TRUE) {
         !names_to_match_strict_def][!ids_of_likely_foreign_apls]
   
   
-  
-  original_apl_patent[patenting_loc=="DD" & appln_filing_year>=1980 & appln_filing_year<=1990,.N,by="merge_type"]
-  ggplot(data=original_apl_patent[patenting_loc=="DD" & appln_filing_year>=1980 & appln_filing_year<=1990,
+  original_apl_patent[appln_auth=="DD" & appln_filing_year>=1980 & appln_filing_year<=1990,.N,by="merge_type"]
+  ggplot(data=original_apl_patent[appln_auth=="DD" & appln_filing_year>=1980 & appln_filing_year<=1990,
                                   list(nr_inventions=uniqueN(appln_nr_epodoc )),
                                   by=c("appln_filing_year","merge_type")][order(appln_filing_year)],
          aes(x=appln_filing_year,y=nr_inventions,fill=merge_type)) + geom_col(position = "stack",alpha=0.6) + theme_classic() +
@@ -138,8 +149,7 @@ if (link_to_registry == TRUE) {
   names_to_match_strict_def["veb berlin chemie"==apl_name,list(apl_name,pure_name)]
   
   
-  names_to_match_strict_def <- names_to_match_strict_def[country_code_city=="de",
-                                                         list(pure_name,apl_eee_hrm_id,
+  names_to_match_strict_def <- names_to_match_strict_def[,list(pure_name,apl_eee_hrm_id,
                                                               country_code_city,
                                                               county_code=as.numeric(county_code),
                                                               county)]
@@ -312,7 +322,7 @@ if (link_to_registry == TRUE) {
     paste(path_tha_project_data,"/orig/VEB_list/VEB_Betriebsliste.xlsx",sep="")))
   
   setnames(all_veb_long_names,
-           c("Name.des.Betriebs","Übergeordnetes.Organ.Kombinat"),
+           c("Name.des.Betriebs","Ãœbergeordnetes.Organ.Kombinat"),
            c("long_name","name_directing_body"))
   all_veb_long_names <- all_veb_long_names[,list(long_name=gsub(long_name,pattern="\\n",replacement=" "),
                                                  name_directing_body=gsub(name_directing_body,pattern="\\n",replacement=" "))]
@@ -384,6 +394,7 @@ if (link_to_registry == TRUE) {
                               by="sbr_id",
                               all.x=TRUE)
   gdr_registry_names[cleaned_name=="minol"]
+  gdr_registry_names[cleaned_name=="minol"]
     
   }
   
@@ -397,9 +408,10 @@ if (link_to_registry == TRUE) {
 {
 print(names_to_match_strict_def[,.N,by="county"][order(N)])
 print(gdr_registry_names[,.N,by="county"][order(N)])
-
+gdr_registry_names[,country:="DD"]
 names_to_match_strict_def[!is.na(county_code),uniqueN(apl_eee_hrm_id)]
 names_to_match_strict_def[,uniqueN(apl_eee_hrm_id)]
+names_to_match_strict_def[,country:="DD"]
 
 match_result <-   fuzzy_name_match(data_set_1=names_to_match_strict_def[!is.na(county_code )][,list(pure_name, apl_eee_hrm_id ,country_code_city, county_code)],
                                    data_set_2=gdr_registry_names[!is.na(county_code )][,list(sbr_id,cleaned_name,country_code_city="de",county_code)],
@@ -463,6 +475,75 @@ match_result <- rbindlist(list(match_result,
 ),use.names=TRUE,fill=TRUE)
  
 
+
+
+
+#without county 
+match_result <-   rbindlist(list(match_result,
+                                 fuzzy_name_match(data_set_1=names_to_match_strict_def[!match_result[merge_type=="5middle"|merge_type=="6high",list(apl_eee_hrm_id)]][
+                                   ][,list(pure_name, apl_eee_hrm_id ,country)],
+                                   data_set_2=gdr_registry_names[][,list(sbr_id,cleaned_name,country)],
+                                   varname_string_data_1="pure_name",
+                                   varname_id_data_1="apl_eee_hrm_id",
+                                   varname_string_data_2="cleaned_name",
+                                   varname_id_data_2="sbr_id",
+                                   varname_string_block_var_both=c("country"),
+                                   match_no_block=FALSE,
+                                   verbose=TRUE)[,list(country,apl_eee_hrm_id,sbr_id,patent_name=pure_name,
+                                                       registry_name=cleaned_name,criterium, merge_type, change_crit,
+                                                       merge_variable="long name veb list")]
+),use.names=TRUE,fill=TRUE)
+
+match_result <- rbindlist(list(match_result,
+                               fuzzy_name_match(data_set_1=names_to_match_strict_def[!match_result[merge_type=="5middle"|merge_type=="6high",list(apl_eee_hrm_id)]][
+                                 ][,list(pure_name, apl_eee_hrm_id ,country)],
+                                 data_set_2=gdr_registry_names[][,list(sbr_id,shortened_pure_name_reg,country)],
+                                 varname_string_data_1="pure_name",
+                                 varname_id_data_1="apl_eee_hrm_id",
+                                 varname_string_data_2="shortened_pure_name_reg",
+                                 varname_id_data_2="sbr_id",
+                                 varname_string_block_var_both=c("country"),
+                                 match_no_block=FALSE,
+                                 verbose=TRUE)[,list(country,apl_eee_hrm_id,sbr_id,patent_name=pure_name,
+                                                     registry_name=shortened_pure_name_reg,criterium, merge_type, change_crit,
+                                                     merge_variable="shortened cleaned registry")]
+),use.names=TRUE,fill=TRUE)
+
+
+match_result <- rbindlist(list(match_result,
+                               fuzzy_name_match(data_set_1=names_to_match_strict_def[!match_result[merge_type=="5middle"|merge_type=="6high",list(apl_eee_hrm_id)]][
+                                 ][,list(pure_name, apl_eee_hrm_id ,country)],
+                                 data_set_2=gdr_registry_names[][,list(sbr_id,name_directing_body,country)],
+                                 varname_string_data_1="pure_name",
+                                 varname_id_data_1="apl_eee_hrm_id",
+                                 varname_string_data_2="name_directing_body",
+                                 varname_id_data_2="sbr_id",
+                                 varname_string_block_var_both=c("country"),
+                                 match_no_block=FALSE,
+                                 verbose=TRUE)[,list(country,apl_eee_hrm_id,sbr_id,patent_name=pure_name,
+                                                     registry_name=name_directing_body,criterium, merge_type, change_crit,
+                                                     merge_variable="directing body")]
+),use.names=TRUE,fill=TRUE)
+
+
+
+match_result <- rbindlist(list(match_result,
+                               fuzzy_name_match(data_set_1=names_to_match_strict_def[!match_result[merge_type=="5middle"|merge_type=="6high",list(apl_eee_hrm_id)]][
+                                 ][,list(pure_name, apl_eee_hrm_id ,country)],
+                                 data_set_2=gdr_registry_names[][,list(sbr_id,pure_name_reg,country)],
+                                 varname_string_data_1="pure_name",
+                                 varname_id_data_1="apl_eee_hrm_id",
+                                 varname_string_data_2="pure_name_reg",
+                                 varname_id_data_2="sbr_id",
+                                 varname_string_block_var_both=c("country"),
+                                 match_no_block=FALSE,
+                                 verbose=TRUE)[,list(country,apl_eee_hrm_id,sbr_id,patent_name=pure_name,
+                                                     registry_name=pure_name_reg,criterium, merge_type, change_crit,
+                                                     merge_variable="cleaned registry")]
+),use.names=TRUE,fill=TRUE)
+
+
+
 match_result[,max_l:=NULL]
 match_result[,sbr_id_num:=as.numeric(sbr_id)]
 match_result <- merge(match_result,
@@ -471,13 +552,27 @@ match_result <- merge(match_result,
                       by.y="sbr_id",
                       all.x=TRUE)
 match_result[is.na(max_l),max_l:=0]
+match_result[,no_county_match:=is.na(county_code)]
+
+setkey(match_result,apl_eee_hrm_id,sbr_id)
+match_result[,match_proposal_id :=seq_len(.N),by=c("apl_eee_hrm_id","sbr_id")]
+match_result[,match_proposal_id:=cumsum(as.numeric(match_proposal_id==1))]
 setkey(match_result,apl_eee_hrm_id,criterium,max_l)
+
 match_result[,rank_fit := seq_len(.N),by="apl_eee_hrm_id"]
-match_result[,nr_fits := .N,by=c("apl_eee_hrm_id","criterium","max_l")]
+match_result[,rank_fit :=min(rank_fit),by="match_proposal_id"]
+match_result[,nr_fits := uniqueN(match_proposal_id),by=c("apl_eee_hrm_id","criterium","max_l")]
 
 match_result[,.N,by="merge_variable"]
 match_result[,.N,by="merge_type"]
-match_result_final <- match_result[rank_fit==1 & (nr_fits==1|merge_variable=="directing body")]
+
+match_result[,best_strings_in_proposal:=seq_len(.N)==1,by=c("apl_eee_hrm_id","sbr_id")]
+match_result_final <- match_result[
+  #accept best match in county if it to only 1 sbr or to a whole combine
+  ((!is.na(county_code) & rank_fit==1 & (nr_fits==1|merge_variable=="directing body")) &best_strings_in_proposal==TRUE) |
+  #accept best high quality match with no county if unique or to a whole combine
+  ((is.na(county_code) & rank_fit==1 & merge_type =="6high" & (nr_fits==1|merge_variable=="directing body")) &best_strings_in_proposal==TRUE)
+  ]
 
 
 original_apl_patent[merge_type=="4low"|merge_type=="5middle"|merge_type=="6high",merge_type :="3tried_to_merge"]
@@ -503,7 +598,7 @@ view_failed_potential_matches[,.N,by="name_directing_body"]
   # alternative: VEB Betriebsliste, but does not 
   # contain sbr_id, so where would that leave us?
   {
-ggplot(data=original_apl_patent[patenting_loc=="DD" & appln_filing_year>=1980 & appln_filing_year<=1990,
+ggplot(data=original_apl_patent[appln_auth=="DD" & appln_filing_year>=1980 & appln_filing_year<=1990,
                                 list(nr_inventions=uniqueN(appln_nr_epodoc )),
                                 by=c("appln_filing_year","merge_type")][order(appln_filing_year)],
        aes(x=appln_filing_year,y=nr_inventions,fill=merge_type)) + geom_col(position = "stack",alpha=0.6) + theme_classic() +
@@ -511,13 +606,14 @@ ggplot(data=original_apl_patent[patenting_loc=="DD" & appln_filing_year>=1980 & 
 
 ggsave(paste(path_to_output_data,"/link_gdr_registry/","coverage_bridge_sbr_id_patent_data.png",sep=""))
 
-
+ 
 for (confidence_level in sort(unique(match_result_final[,merge_type]))) {
   print(confidence_level)
   print(match_result_final[merge_type==eval(confidence_level),list(merge_type,
                                                                    patent_name,
                                                                    registry_name ,
-                                                             criterium=round(criterium,digits = 2)
+                                                             criterium=round(criterium,digits = 2),
+                                                             county_code
                                                              )])
 }
 
@@ -534,25 +630,25 @@ results_top_100 <- merge(top_100_gdr_patenters,
                          match_result_final[rank_fit==1 & nr_fits==1,
                                       list(merge_type,
                                            county_code, 
-                                           pure_name,
-                                           pure_name_reg,
+                                           patent_name,
+                                           registry_name,
                                            criterium=round(criterium,digits = 2),
                                            apl_eee_hrm_id )],
                          by="apl_eee_hrm_id")
 
 print(results_top_100[,.N,by="merge_type"])
 
-results_top_100[,list(apl_name,DD,pure_name_reg,merge_type,criterium)]
+results_top_100[,list(apl_name,DD,registry_name,merge_type,criterium)]
 
 
 print(match_result_final[merge_type=="3tried_to_merge",
                    list(county_code, 
-                        pure_name,
-                        pure_name_reg,
+                        patent_name,
+                        registry_name,
                         criterium=round(criterium,digits = 2))])
 
 
-fwrite(match_result_final[merge_type!="3tried_to_merge"&rank_fit==1 & nr_fits==1],
+fwrite(match_result_final,
        file=paste(path_to_output_data,"/link_gdr_registry/","bridge_sbr_id_patent_data.csv",sep=""))
 
 
