@@ -382,7 +382,7 @@ if (find_ipc_class_communites =="YES"){
   # load information about nodes
   #---#---#---#---#---#---#---#
   node_data_ipc <- merge(node_data_ipc,
-                     fread(file = paste(path_to_output_data,"/",data_name,"/", "community_size_density.csv", sep="")),
+                     fread(file = paste(path_to_output_data,"/",data_name,"/data_preparation/", "community_size_density.csv", sep="")),
                      by="ipc_class_symbol")
   node_data_ipc[,label_ipc_class_symbol:=NULL]
   node_data_ipc[share_all_inventors>0.5,label_ipc_class_symbol:=ipc_class_symbol]
