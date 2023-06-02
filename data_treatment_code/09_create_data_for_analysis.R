@@ -60,7 +60,7 @@ setkey(patent_citations,appln_id)
   #---#---#---#---#---#---#
   localization_inv <- fread(paste(path_to_output_data,"/data_preparation/localization_inventors/localization_data.csv",sep=""),
         encoding="UTF-8")
-  
+  localization_inv[dummy_ex_gdr==FALSE & is.na(pair_city_region ),dummy_ex_gdr:=NA]
   #ipc communities inventors
   #---#---#---#---#---#---#
   community_statistics_per_inventor <- fread(file=paste(path_to_output_data,"/",data_name,"/data_preparation/community_statistics_per_inventor",".csv", sep=""),
@@ -144,10 +144,11 @@ setkey(patent_citations,appln_id)
                                        all.x=TRUE
   )    
   
+  setkeyv(enriched_inv_id_lexicon,id_variable_to_use)
   
-  setnames(enriched_inv_id_lexicon,
-           old=id_variable_to_use,
-           new="inv_rl_cl_uni_id")
+  enriched_inv_id_lexicon[,inv_rl_cl_uni_id:=seq_len(.N),by=id_variable_to_use]
+  enriched_inv_id_lexicon[,inv_rl_cl_uni_id:=cumsum(as.numeric(inv_rl_cl_uni_id==1)),]
+
   fwrite(enriched_inv_id_lexicon,
          file=paste(path_to_output_data,"/","/enriched_inv_id_lexicon",".csv",sep=""))
   
@@ -161,15 +162,13 @@ setkey(patent_citations,appln_id)
 #create patent data (inv)
 #-----------------------
 {
-gdr_inv_patent <- merge(
-  PatentsView_identifiers,
-  original_inv_patent,
+raw_data_inv_patent <- merge(
+  unique(enriched_inv_id_lexicon[,list(inv_rl_cl_uni_id,inv_person_id)]),
+  original_inv_patent[,list(inv_person_id,appln_nr_epodoc, appln_auth ,appln_filing_year, docdb_family_id)],
   by=c("inv_person_id")
 )
-setnames(gdr_inv_patent,
-         old=id_variable_to_use,
-         new="inv_rl_cl_uni_id")
-fwrite(gdr_inv_patent,
+
+fwrite(raw_data_inv_patent,
        paste(path_to_output_data,"/","/raw_data_inv_patent",".csv",sep=""))
 
 }

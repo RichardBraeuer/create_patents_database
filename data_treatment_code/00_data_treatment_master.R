@@ -4,7 +4,7 @@
 rm(list=setdiff(ls(), "syntax_path"))
 gc()
 
-location <- "chicago_server"
+location <- "IWH"
 
 set.seed(45678)
 
@@ -123,7 +123,7 @@ source(paste0(syntax_path,"/data_treatment_code/06_create_communities_for_ids.R"
 
 #options and launch for chapter 07_describe_original_patstat_data.R
 #--#--#--#--#---#--#--#--#--#---#---#---#---#---#---#
-describe_patent_data="no"
+describe_patent_data="YES"
 source(paste0(syntax_path,"/data_treatment_code/07_describe_original_patstat_data.R"))
 
 #options and launch for chapter 08_create_data_for_analysis.R
