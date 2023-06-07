@@ -33,11 +33,11 @@ basis_gdr_data_selection_apl <- fread(paste(path_to_raw_downloaded_data,"patents
 basis_gdr_data_selection_apl[((apl_ctry == "DE" | apl_ctry == "DD") ),consider:=TRUE]
 
 basis_gdr_data_selection <- merge(basis_gdr_data_selection,
-                                  basis_gdr_data_selection_apl[consider==TRUE,list(appln_nr_epodoc,consider)],
-                                  all.x=TRUE,
+                                  unique(basis_gdr_data_selection_apl[consider==TRUE,list(appln_nr_epodoc,consider)]),
+                                  all=TRUE,
                                   by="appln_nr_epodoc")
 
-basis_gdr_data_selection[inv_ctry!="",consider:=FALSE]
+basis_gdr_data_selection[is.na(consider),consider:=FALSE]
 basis_gdr_data_selection[
                                 (inv_ctry=="DD"|inv_ctry=="DE") | 
                                 (appln_auth =="DD"|appln_auth =="DE")| 
@@ -81,11 +81,11 @@ setkey(list_apl_gdr,apl_person_id)
 rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
                encoding="UTF-8")
 rich2[,person_id:=as.numeric(person_id)]
-list_apl_gdr <- merge(unique(rich2[,list(patstat_id ,person_id)],by="person_id"),
+list_apl_gdr <- merge(unique(rich2[,list(company_id ,person_id)],by="person_id"),
       list_apl_gdr,
       by.x="person_id",
       by.y="apl_person_id",
-      all.x=TRUE)
+      all.y=TRUE)
 
 
 fwrite(list_apl_gdr,
@@ -151,11 +151,11 @@ if (file.exists(paste(path_to_output_data,"/ussr_relevant_data/list_cleaned_ids_
   rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
                  encoding="UTF-8")
   rich2[,person_id:=as.numeric(person_id)]
-  list_apl_ussr <- merge(unique(rich2[,list(patstat_id ,person_id)],by="person_id"),
+  list_apl_ussr <- merge(unique(rich2[,list(company_id ,person_id)],by="person_id"),
                          list_apl_ussr,
                         by.x="person_id",
                         by.y="apl_person_id",
-                        all.x=TRUE)
+                        all.y=TRUE)
   
   
   
@@ -222,11 +222,11 @@ if (file.exists(paste(path_to_output_data,"/inv_matching_relevant_data/list_clea
   rich2 <- fread(file = paste(path_to_raw_downloaded_data, "/amadeus_merge_remerge/", "rich2.csv", sep=""),
                  encoding="UTF-8")
   rich2[,person_id:=as.numeric(person_id)]
-  list_apl_inv_matching <- merge(unique(rich2[,list(patstat_id ,person_id)],by="person_id"),
+  list_apl_inv_matching <- merge(unique(rich2[,list(company_id ,person_id)],by="person_id"),
                                  list_apl_inv_matching,
                         by.x="person_id",
                         by.y="apl_person_id",
-                        all.x=TRUE)
+                        all.y=TRUE)
   
   
   fwrite(list_apl_inv_matching,
@@ -544,13 +544,13 @@ if (location == "chicago_server"){
                    encoding="UTF-8")
     rich2[,person_id:=as.numeric(person_id)]
     raw_assignee <- merge(raw_assignee,
-                          unique(rich2[,list(patstat_id ,person_id=as.character(person_id))],by="person_id"),
+                          unique(rich2[,list(company_id ,person_id=as.character(person_id))],by="person_id"),
                           by.x="uuid",
                           by.y="person_id",
-                          all.x=TRUE)
+                          all.y=TRUE)
     
     
-    raw_assignee[!is.na(patstat_id),assignee_id:=assignee_id[[1]],by="patstat_id"]
+    raw_assignee[!is.na(company_id),assignee_id:=assignee_id[[1]],by="company_id"]
     
     
     setkey(raw_assignee,uuid)

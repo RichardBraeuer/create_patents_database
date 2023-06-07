@@ -338,4 +338,8 @@ imputation_decision <- unique(inventor_technologies[imputed_community!="no",.N,b
 fwrite(inventor_technologies,
        file=paste(path_to_output_data,"/",data_name,"/data_preparation/community_statistics_per_inventor",".csv", sep="")) 
 
+
+community_overview <- inventor_technologies[,.N,by="community"][order(N)]
+community_overview [,share:=N/sum(N)]
+community_overview 
 }
