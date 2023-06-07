@@ -179,11 +179,8 @@ for (sub_data_path in list_of_data_paths) {
   pairings_inventor_firm <- unique( merge( 
     fread(paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_inv_patent_",version_description,".csv",sep=""),
           encoding="UTF-8"),
-    merge(fread(paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_apl_patent_",version_description,".csv",sep=""),
+    fread(paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_apl_patent_",version_description,".csv",sep=""),
           encoding="UTF-8"),
-          unique(fread(paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/enriched_apl_id_lexicon_",version_description,".csv",sep=""),
-                encoding="UTF-8")[apl_eee_sector=="COMPANY",list(apl_rl_cl_uni_id)]),
-          by="apl_rl_cl_uni_id"),
     by="appln_nr_epodoc",
     allow.cartesian=TRUE,
     all=TRUE
@@ -196,7 +193,7 @@ for (sub_data_path in list_of_data_paths) {
   pairings_inventor_firm <- unique(merge(pairings_inventor_firm,
                                          unique(fread(paste(path_to_output_data,"/",sub_data_name,"_relevant_data/","/raw_data_inv_patent_",version_description,".csv",sep=""),
                                                       encoding="UTF-8")[,list(docdb_family_id,appln_nr_epodoc,appln_filing_year)][,list(appln_nr_epodoc,appln_filing_year=min(appln_filing_year)),by="docdb_family_id"]),
-                                         by="appln_nr_epodoc")[,list(inv_rl_cl_uni_id, apl_rl_cl_uni_id,docdb_family_id,appln_filing_year)])
+                                         by="appln_nr_epodoc")[,list(inv_rl_cl_uni_id, apl_rl_cl_uni_id,docdb_family_id,appln_filing_year,inv_ctry,apl_ctry)])
  
   #---------------------------------------
   #Assign inventors to firms based on most
